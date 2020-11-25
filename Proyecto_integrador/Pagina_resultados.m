@@ -95,7 +95,7 @@ function pushbutton1_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 %------------------------------------------------------
 % Modificamos cada parametro en la simulacion de simulink
-global Proceso Act1 sens1 pla1 cont;
+global Proceso Act1 sens1 pla1 cont compensad;
 clc;
 format compact
 format short e;
@@ -121,36 +121,6 @@ compeadeatr = get(handles.aderet,'Value');
 g = str2num(e)*str2num(c);
 ple = mat2str([g]);
 
-% if (comprobp == 1)
-%     % Controlador proporcional
-%     der = 0;
-%     int = 0;
-%     cont = tf(str2num(Kp),1);
-% end
-% 
-% if (comprobi == 1)
-%     % Controlador Integral
-%     der = 0;
-%     int = str2num(Kp)/(str2num(T));
-%     cont = tf([str2num(Kp)*str2num(T) str2num(Kp)],[str2num(T) 0]);
-% end
-% 
-% 
-% if (comprobd == 1)
-%     % Controlador derivativo
-%     int = 0;
-%     der = str2num(Kp)*str2num(T);
-%     cont = tf ([str2num(Kp)*str2num(T) 1],1); %tf([str2num(Kp)*str2num(T) str2num(Kp)],[str2num(T) 0]);
-% end
-% 
-%
-% 
-% % if (comprobd == 1)
-% %     % Controlador derivativo
-% %     int = 0;
-% %     der = str2num(Kp)*str2num(T);
-% %     cont = tf ([str2num(Kp)*str2num(T) 1],1);
-% % end
 if (comprobp == 1)
     % Controlador proporcional
     der = 0;
@@ -178,11 +148,12 @@ end
         %%Controlador derivativo
         int = 0;
         der=0;
+        cont = tf(str2num(Kp),1);
         g1=str2num(Kp);
         g2=str2num(T);
         %alpha = linspace(0,1,0.1);
         alpha = 0.4;
-        compensad = tf ((g1*alpha)*[g2 1],[(g2*alpha) 1]);
+        compensad = tf ((g1*alpha)*[g2 1],[(g2*alpha) 1])
         numcompe1 = (g1*alpha)*[g2 1];
         DenCompe1 = [(g2*alpha) 1];
         numcompe2 = ["[", numcompe1,"]"];
@@ -193,6 +164,52 @@ end
         set_param('Simulacion_integrador/Compensador','Numerator',numcompe);
         set_param('Simulacion_integrador/Compensador','Denominator',Dencompe);
  end
+ 
+ if (compeatr == 1)
+        %%Controlador derivativo
+        int = 0;
+        der=0;
+        cont = tf(str2num(Kp),1);
+        g1=str2num(Kp);
+        g2=str2num(T);
+        %alpha = linspace(0,1,0.1);
+        beta = 2;
+        compensad = tf ((g1*beta)*[g2 1],[(g2*beta) 1])
+        numcompe1 = (g1*beta)*[g2 1];
+        DenCompe1 = [(g2*beta) 1];
+        numcompe2 = ["[", numcompe1,"]"];
+        Dencompe2 = ["[",DenCompe1,"]"];
+        numcompe = join(numcompe2);
+        Dencompe = join(Dencompe2);
+        
+        set_param('Simulacion_integrador/Compensador','Numerator',numcompe);
+        set_param('Simulacion_integrador/Compensador','Denominator',Dencompe);
+ end
+  if (compeadeatr == 1)
+        %%Controlador derivativo
+        int = 0;
+        der=0;
+        g1=str2num(Kp);
+        g2=str2num(T);
+        cont = tf(str2num(Kp),1);
+        %alpha = linspace(0,1,0.1);
+        gama = 3;
+        beta = 2;
+        H1= tf((1/gama)*[g2 1],[(g2/gama) 1])
+        H2= tf((beta)*[g2 1],[(g2*beta) 1])
+        compensad = g1*H1*H2;
+        numcompe1 = ((g1/gama)*[g2 1]).*((beta)*[g2 1]);
+        DenCompe1 = ([(g2/gama) 1]).*([(g2*beta) 1]);
+        numcompe2 = ["[", numcompe1,"]"];
+        Dencompe2 = ["[",DenCompe1,"]"];
+        numcompe = join(numcompe2);
+        Dencompe = join(Dencompe2);
+        
+        set_param('Simulacion_integrador/Compensador','Numerator',numcompe);
+        set_param('Simulacion_integrador/Compensador','Denominator',Dencompe);
+ end
+ 
+ 
 
 
 
@@ -260,6 +277,15 @@ axes(handles.Polos);
     end
     
     if (compeade == 1)
+    dentf2prub = [1 2 25.4 14 0 7.98*k 11.967*k  3.99*k]; %% Para criterio de K
+    [salida,pantalla,rang] = RouthSolver(dentf2prub); %% Para cuando tengo proporcional
+    end
+    
+    if (compeatr== 1)
+    dentf2prub = [1 2 25.4 14 0 7.98*k 11.967*k  3.99*k]; %% Para criterio de K
+    [salida,pantalla,rang] = RouthSolver(dentf2prub); %% Para cuando tengo proporcional
+    end
+     if (compeadeatr== 1)
     dentf2prub = [1 2 25.4 14 0 7.98*k 11.967*k  3.99*k]; %% Para criterio de K
     [salida,pantalla,rang] = RouthSolver(dentf2prub); %% Para cuando tengo proporcional
     end
@@ -454,7 +480,7 @@ set(handles.Error,'string',evalc('errE'));
 axes(handles.Bode);
 cla(handles.Bode);
 %Calculamos G(s)*H(s) para calcular la FT de lazo abierto como se establece en la teoria, en este caso seria C(s)*A(s)*P(s)*S(s)
-FTLA = cont*Act1*pla1*sens1
+FTLA = cont*Act1*pla1*sens1*compensad
 bode(FTLA);
 hold on;
 %Calculo de margen de fase (Mfase) y margen de ganancia(Mgan)
