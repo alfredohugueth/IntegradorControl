@@ -175,20 +175,16 @@ if (comprobd == 1)
     compensad=1;
 end
  if (compeade == 1)
-        %%Controlador derivativo
+        Controlador derivativo
         int = 0;
         der=0;
         g1=str2num(Kp);
         g2=str2num(T);
         %alpha = linspace(0,1,0.1);
-        alpha = 0.4;
+        alpha = 0.5;
         compensad = tf ((g1*alpha)*[g2 1],[(g2*alpha) 1]);
-        numcompe1 = (g1*alpha)*[g2 1];
-        DenCompe1 = [(g2*alpha) 1];
-        numcompe2 = ["[", numcompe1,"]"];
-        Dencompe2 = ["[",DenCompe1,"]"];
-        numcompe = join(numcompe2);
-        Dencompe = join(Dencompe2);
+        numcompe = (g1*alpha)*[g2 1];
+        DenCompe
         
         set_param('Simulacion_integrador/Compensador','Numerator',numcompe);
         set_param('Simulacion_integrador/Compensador','Denominator',Dencompe);
@@ -212,7 +208,7 @@ syms s;
 Act1 = tf(str2num(a),str2num(b));
 pla1 = tf(str2num(c),str2num(d));
 sens1 = tf(str2num(e),str2num(f));
-Proceso = (((Act1*pla1*cont*compensad))/(1+Act1*pla1*sens1*cont*compensad));
+Proceso = (((Act1*pla1*cont))/(1+Act1*pla1*sens1*cont));
 opt = balredOptions('Offset',.001,'StateElimMethod','Truncate');
 transf = zpk(Proceso);
 %%FuncionTransfer = balred(transf,4,opt);
