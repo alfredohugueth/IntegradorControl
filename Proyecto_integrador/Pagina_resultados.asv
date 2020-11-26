@@ -122,38 +122,14 @@ g = str2num(e)*str2num(c);
 ple = mat2str([g]);
 
 if (comprobp == 1)
-    % Controlador proporcional
-    der = 0;
-    int = 0;
-    cont = tf(str2num(Kp),1);
-    compensad=1;
-end
-
-if (comprobi == 1)
-    % Controlador Integral
-    der = 0;
-    int = str2num(Kp)/(str2num(T));
-    cont = tf([str2num(Kp)*str2num(T) str2num(Kp)],[str2num(T) 0]);
-    compensad=1;
-end
-
-if (comprobd == 1)
-    % Controlador derivativo
-    int = 0;
-    der = str2num(Kp)*str2num(T);
-    cont = tf ([str2num(Kp)*str2num(T) 1],1);
-    compensad=1;
-end
- if (compeade == 1)
-        %%Controlador derivativo
+    if (compeade == 1)
         int = 0;
         der=0;
         cont = tf(str2num(Kp),1);
         g1=str2num(Kp);
         g2=str2num(T);
-        %alpha = linspace(0,1,0.1);
         alpha = 0.4;
-        compensad = tf ((g1*alpha)*[g2 1],[(g2*alpha) 1])
+        compensad = tf ((g1*alpha)*[g2 1],[(g2*alpha) 1]);
         numcompe1 = (g1*alpha)*[g2 1];
         DenCompe1 = [(g2*alpha) 1];
         numcompe2 = ["[", numcompe1,"]"];
@@ -163,9 +139,8 @@ end
         
         set_param('Simulacion_integrador/Compensador','Numerator',numcompe);
         set_param('Simulacion_integrador/Compensador','Denominator',Dencompe);
- end
- 
- if (compeatr == 1)
+    end
+    if (compeatr == 1)
         %%Controlador derivativo
         int = 0;
         der=0;
@@ -184,8 +159,8 @@ end
         
         set_param('Simulacion_integrador/Compensador','Numerator',numcompe);
         set_param('Simulacion_integrador/Compensador','Denominator',Dencompe);
- end
-  if (compeadeatr == 1)
+    end
+    if (compeadeatr == 1)
         %%Controlador derivativo
         int = 0;
         der=0;
@@ -207,7 +182,155 @@ end
         
         set_param('Simulacion_integrador/Compensador','Numerator',numcompe);
         set_param('Simulacion_integrador/Compensador','Denominator',Dencompe);
- end
+    end
+    if (comprobp == 1 && compeade == 0 && compeatr == 0 && compeadeatr == 0)
+    der = 0;
+    int = 0;
+    cont = tf(str2num(Kp),1);
+    compensad=1;
+    printf("hola")
+    end
+end
+
+if (comprobi == 1)
+    if (compeade == 1)
+        der = 0;
+        int = str2num(Kp)/(str2num(T));
+        cont = tf([str2num(Kp)*str2num(T) str2num(Kp)],[str2num(T) 0]);
+        g1=str2num(Kp);
+        g2=str2num(T);
+        alpha = 0.4;
+        compensad = tf ((g1*alpha)*[g2 1],[(g2*alpha) 1]);
+        numcompe1 = (g1*alpha)*[g2 1];
+        DenCompe1 = [(g2*alpha) 1];
+        numcompe2 = ["[", numcompe1,"]"];
+        Dencompe2 = ["[",DenCompe1,"]"];
+        numcompe = join(numcompe2);
+        Dencompe = join(Dencompe2);
+        
+        set_param('Simulacion_integrador/Compensador','Numerator',numcompe);
+        set_param('Simulacion_integrador/Compensador','Denominator',Dencompe);
+    end
+    if (compeatr == 1)
+        %%Controlador derivativo
+        der = 0;
+        int = str2num(Kp)/(str2num(T));
+        cont = tf([str2num(Kp)*str2num(T) str2num(Kp)],[str2num(T) 0]);
+        g1=str2num(Kp);
+        g2=str2num(T);
+        %alpha = linspace(0,1,0.1);
+        beta = 2;
+        compensad = tf ((g1*beta)*[g2 1],[(g2*beta) 1])
+        numcompe1 = (g1*beta)*[g2 1];
+        DenCompe1 = [(g2*beta) 1];
+        numcompe2 = ["[", numcompe1,"]"];
+        Dencompe2 = ["[",DenCompe1,"]"];
+        numcompe = join(numcompe2);
+        Dencompe = join(Dencompe2);
+        
+        set_param('Simulacion_integrador/Compensador','Numerator',numcompe);
+        set_param('Simulacion_integrador/Compensador','Denominator',Dencompe);
+    end
+    if (compeadeatr == 1)
+        %%Controlador derivativo
+        der = 0;
+        int = str2num(Kp)/(str2num(T));
+        cont = tf([str2num(Kp)*str2num(T) str2num(Kp)],[str2num(T) 0]);
+        g1=str2num(Kp);
+        g2=str2num(T);
+        %alpha = linspace(0,1,0.1);
+        gama = 3;
+        beta = 2;
+        H1= tf((1/gama)*[g2 1],[(g2/gama) 1])
+        H2= tf((beta)*[g2 1],[(g2*beta) 1])
+        compensad = g1*H1*H2;
+        numcompe1 = ((g1/gama)*[g2 1]).*((beta)*[g2 1]);
+        DenCompe1 = ([(g2/gama) 1]).*([(g2*beta) 1]);
+        numcompe2 = ["[", numcompe1,"]"];
+        Dencompe2 = ["[",DenCompe1,"]"];
+        numcompe = join(numcompe2);
+        Dencompe = join(Dencompe2);
+        
+        set_param('Simulacion_integrador/Compensador','Numerator',numcompe);
+        set_param('Simulacion_integrador/Compensador','Denominator',Dencompe);
+    end
+    if (comprobi == 1 && compeade == 0 && compeatr == 0 && compeadeatr == 0)
+    der = 0;
+    int = str2num(Kp)/(str2num(T));
+    cont = tf([str2num(Kp)*str2num(T) str2num(Kp)],[str2num(T) 0]);
+    compensad=1;
+    end
+    
+end
+
+if (comprobd == 1)
+     if (compeade == 1)
+        int = 0;
+        der = str2num(Kp)*str2num(T);
+        cont = tf ([str2num(Kp)*str2num(T) 1],1);
+        g1=str2num(Kp);
+        g2=str2num(T);
+        alpha = 0.4;
+        compensad = tf ((g1*alpha)*[g2 1],[(g2*alpha) 1]);
+        numcompe1 = (g1*alpha)*[g2 1];
+        DenCompe1 = [(g2*alpha) 1];
+        numcompe2 = ["[", numcompe1,"]"];
+        Dencompe2 = ["[",DenCompe1,"]"];
+        numcompe = join(numcompe2);
+        Dencompe = join(Dencompe2);
+        
+        set_param('Simulacion_integrador/Compensador','Numerator',numcompe);
+        set_param('Simulacion_integrador/Compensador','Denominator',Dencompe);
+    end
+    if (compeatr == 1)
+        %%Controlador derivativo
+        int = 0;
+        der = str2num(Kp)*str2num(T);
+        cont = tf ([str2num(Kp)*str2num(T) 1],1);
+        g1=str2num(Kp);
+        g2=str2num(T);
+        %alpha = linspace(0,1,0.1);
+        beta = 2;
+        compensad = tf ((g1*beta)*[g2 1],[(g2*beta) 1])
+        numcompe1 = (g1*beta)*[g2 1];
+        DenCompe1 = [(g2*beta) 1];
+        numcompe2 = ["[", numcompe1,"]"];
+        Dencompe2 = ["[",DenCompe1,"]"];
+        numcompe = join(numcompe2);
+        Dencompe = join(Dencompe2);
+        
+        set_param('Simulacion_integrador/Compensador','Numerator',numcompe);
+        set_param('Simulacion_integrador/Compensador','Denominator',Dencompe);
+    end
+    if (compeadeatr == 1)
+        %%Controlador derivativo
+        int = 0;
+        der = str2num(Kp)*str2num(T);
+        cont = tf ([str2num(Kp)*str2num(T) 1],1);
+        g1=str2num(Kp);
+        g2=str2num(T);
+        gama = 3;
+        beta = 2;
+        H1= tf((1/gama)*[g2 1],[(g2/gama) 1])
+        H2= tf((beta)*[g2 1],[(g2*beta) 1])
+        compensad = g1*H1*H2;
+        numcompe1 = ((g1/gama)*[g2 1]).*((beta)*[g2 1]);
+        DenCompe1 = ([(g2/gama) 1]).*([(g2*beta) 1]);
+        numcompe2 = ["[", numcompe1,"]"];
+        Dencompe2 = ["[",DenCompe1,"]"];
+        numcompe = join(numcompe2);
+        Dencompe = join(Dencompe2);
+        
+        set_param('Simulacion_integrador/Compensador','Numerator',numcompe);
+        set_param('Simulacion_integrador/Compensador','Denominator',Dencompe);
+    end
+    if (comprobd == 1 && compeade == 0 && compeatr == 0 && compeadeatr == 0)
+    int = 0;
+    der = str2num(Kp)*str2num(T);
+    cont = tf ([str2num(Kp)*str2num(T) 1],1);
+    compensad=1;
+    end   
+end
  
  
 
@@ -293,9 +416,9 @@ axes(handles.Polos);
     pre1 = salida;
     pre2 = pantalla;
     %rot = double(arreglo);
-    inter = vpa(rang,4);
-    
-    set(handles.IntervaloEsta,'string',evalc('inter'));
+%     inter = vpa(rang,4);
+%     
+%     set(handles.IntervaloEsta,'string',evalc('inter'));
     
    
 
@@ -384,7 +507,7 @@ else
     for i=0.1:0.1:10
     nuevK = i; 
     contad = contad+1;
-    nuevproc = (((Act1*pla1*cont*nuevK))/(1+Act1*pla1*sens1*cont*nuevK));
+    nuevproc = (((Act1*pla1*cont*nuevK*compensad))/(1+Act1*pla1*sens1*cont*nuevK*compensad));
     paramN = stepinfo(nuevproc);
     RTm(contad) = paramN.RiseTime;
     STm(contad) = paramN.SettlingTime; % Tiempo de establecimiento
@@ -496,7 +619,7 @@ frecpico = w(k); % Frecuencia de ganancia pico.
 % Calculamos el ancho de banda del sistema.
 % La describimos como la frecuencia en la que al ganancia cae 3 db. (Para los 3 controladores la ganancia maxima es de 0 db) 
 n = 1;
-while 20*log10(mag(n)) > 1
+while 20*log10(mag(n)) > 50
       n = n+1;
 end
 wc=w(n);
@@ -1376,6 +1499,7 @@ function Kslider_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 global Kslider;
 Kslider = get(handles.Kslider,'Value');
+set(handles.Kcontr,'string',Kslider);
 
 
 
@@ -1402,6 +1526,7 @@ function Tslider_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 global Tcon;
 Tcon = get(handles.Tslider,'Value');
+set(handles.Tcontrolador,'string',Tcon);
 
 % Hints: get(hObject,'Value') returns position of slider
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
