@@ -1376,7 +1376,6 @@ function Kslider_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 global Kslider;
 Kslider = get(handles.Kslider,'Value');
-set(handles.Kcontr,'string',Kslider);
 
 
 
@@ -1403,7 +1402,6 @@ function Tslider_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 global Tcon;
 Tcon = get(handles.Tslider,'Value');
-set(handles.Tcontrolador,'string',Tcon);
 
 % Hints: get(hObject,'Value') returns position of slider
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
